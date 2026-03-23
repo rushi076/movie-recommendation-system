@@ -1,70 +1,74 @@
 const API_KEY = "162f101e";
 
+// Enter key se search support
+document.getElementById("movieInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") searchMovie();
+});
+
 async function searchMovie() {
-    const movieInput = document.getElementById("movieInput");
+    const input = document.getElementById("movieInput");
     const resultDiv = document.getElementById("movieResult");
-    const movie = movieInput.value;
+    const movie = input.value;
 
-    if (!movie) return alert("Please enter a movie name");
+    if (!movie) return;
 
-    resultDiv.innerHTML = "<p>Searching...</p>";
+    resultDiv.innerHTML = `<div class="loader">Magic is happening...</div>`;
 
     try {
-        const response = await fetch(`https://omdbapi.com/?t=${movie}&apikey=${API_KEY}`);
-        const data = await response.json();
+        const res = await fetch(`https://omdbapi.com/?t=${movie}&apikey=${API_KEY}`);
+        const data = await res.json();
 
         if (data.Response === "False") {
-            resultDiv.innerHTML = `<p>❌ Movie not found!</p>`;
+            resultDiv.innerHTML = `<p>Oops! Movie nahi mili.</p>`;
             return;
         }
 
         resultDiv.innerHTML = `
-            <div class="movieCard" style="width: 100%; max-width: 300px; margin: 0 auto;">
-                <img src="${data.Poster !== 'N/A' ? data.Poster : 'https://via.placeholder.com/300x450?text=No+Poster'}" alt="${data.Title}">
-                <h3>${data.Title}</h3>
-                <p class="rating">⭐ ${data.imdbRating}</p>
-                <p style="font-size: 0.8rem; opacity: 0.8;">${data.Genre}</p>
-                <p style="font-size: 0.9rem; margin-top: 10px;">${data.Plot.substring(0, 100)}...</p>
+            <div class="movieCard" style="max-width: 350px; width: 100%;">
+                <img src="${data.Poster !== 'N/A' ? data.Poster : 'https://via.placeholder.com/300x450'}" />
+                <div style="padding: 10px;">
+                    <h3>${data.Title}</h3>
+                    <p class="rating">⭐ ${data.imdbRating} | ${data.Year}</p>
+                    <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 8px;">${data.Plot}</p>
+                </div>
             </div>
         `;
 
-        // Recommendation trigger
-        recommendMovies(data.Genre.split(",")[0]); // Pehla primary genre pick karega
+        recommendMovies(data.Genre.split(",")[0]);
 
-    } catch (error) {
-        console.error("Error fetching data:", error);
+    } catch (err) {
+        console.error(err);
     }
 }
 
 async function recommendMovies(genre) {
     const recDiv = document.getElementById("recommendations");
-    recDiv.innerHTML = "<p>Loading recommendations...</p>";
+    recDiv.innerHTML = "";
 
-    // Advanced: Genre mapping for better variety
-    const genreMap = {
-        "Action": ["The Dark Knight", "John Wick", "Mad Max: Fury Road"],
-        "Comedy": ["The Hangover", "Superbad", "Step Brothers"],
-        "Horror": ["The Conjuring", "It", "Hereditary"],
-        "Sci-Fi": ["Interstellar", "The Matrix", "Blade Runner 2049"],
-        "Romance": ["About Time", "Notebook", "Past Lives"]
+    const genrePool = {
+        "Action": ["The Dark Knight", "John Wick", "Avengers", "Gladiator", "Inception"],
+        "Horror": ["The Conjuring", "It", "Sinister", "A Quiet Place"],
+        "Sci-Fi": ["Interstellar", "Tenet", "The Matrix", "Dune"],
+        "Comedy": ["Hangover", "Deadpool", "Superbad", "Free Guy"],
+        "Drama": ["Forrest Gump", "The Shawshank Redemption", "The Godfather"]
     };
 
-    let moviesList = genreMap[genre] || ["Inception", "Arrival", "Gravity"];
+    let moviesList = genrePool[genre.trim()] || ["Avatar", "Titanic", "Inception", "Arrival"];
 
-    let html = "";
-    for (let m of moviesList) {
+    for (let title of moviesList) {
         try {
-            const res = await fetch(`https://www.omdbapi.com/?t=${m}&apikey=${API_KEY}`);
+            const res = await fetch(`https://omdbapi.com/?t=${title}&apikey=${API_KEY}`);
             const d = await res.json();
-            
-            html += `
-                <div class="movieCard">
-                    <img src="${d.Poster}" alt="${d.Title}">
-                    <h3>${d.Title}</h3>
-                    <p class="rating">⭐ ${d.imdbRating}</p>
-                </div>
-            `;
-        } catch (e) { console.log(e); }
+
+            if (d.Response !== "False") {
+                recDiv.innerHTML += `
+                    <div class="movieCard">
+                        <img src="${d.Poster}">
+                        <h3>${d.Title}</h3>
+                        <p class="rating">⭐ ${d.imdbRating}</p>
+                    </div>
+                `;
+            }
+        } catch (e) {}
     }
-    recDiv.innerHTML = html;
 }

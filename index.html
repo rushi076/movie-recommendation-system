@@ -1,24 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<title> Movie Recommendation System</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMagic | AI Movie Recommender</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-<h1>🎬 AI Movie Recommendation System</h1>
+<div class="background-glow"></div>
 
-<input type="text" id="movieInput" placeholder="Enter movie name">
-<button onclick="searchMovie()">Search</button>
+<div class="app-container">
+    <header>
+        <h1 class="logo">🎬 Cine<span>Magic</span></h1>
+        <p class="tagline">Movie Recommendation System</p>
+        
+        <div class="search-wrapper">
+            <input type="text" id="movieInput" placeholder="Kounsi movie pasand hai? (e.g. Inception)">
+            <button onclick="searchMovie()" id="searchBtn">Search</button>
+        </div>
+    </header>
 
-<div id="movieResult"></div>
+    <main>
+        <div id="movieResult" class="featured-result"></div>
 
-<h2>Recommended Movies</h2>
+        <div class="section-title">
+            <h2>Recommended for You</h2>
+            <div class="line"></div>
+        </div>
 
-<div id="recommendations"></div>
+        <div id="recommendations" class="movie-grid"></div>
+    </main>
+</div>
 
 <script src="script.js"></script>
-
 </body>
-</html>
+</html>  
