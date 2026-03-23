@@ -1,35 +1,108 @@
-body{
-font-family: Arial;
-background:#0f172a;
-color:white;
-text-align:center;
+:root {
+    --primary: #22c55e;
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #f8fafc;
 }
 
-input{
-padding:10px;
-width:220px;
-border:none;
-border-radius:5px;
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
 }
 
-button{
-padding:10px 20px;
-background:#22c55e;
-border:none;
-color:white;
-cursor:pointer;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.movieCard{
-background:#1e293b;
-margin:10px;
-padding:15px;
-border-radius:10px;
-display:inline-block;
-width:200px;
+h1 span { color: var(--primary); }
+
+.search-box {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-.movieCard img{
-width:100%;
-border-radius:8px;
+input {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #334155;
+    border-radius: 30px;
+    background: #1e293b;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus { border-color: var(--primary); }
+
+button {
+    padding: 12px 25px;
+    background: var(--primary);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+button:active { transform: scale(0.95); }
+
+/* Responsive Grid */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.movieCard {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    text-align: left;
+    transition: 0.3s;
+    border: 1px solid transparent;
+}
+
+.movieCard:hover {
+    transform: translateY(-5-px);
+    border-color: #334155;
+}
+
+.movieCard img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover; /* Images stretch nahi hongi */
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.movieCard h3 {
+    font-size: 1rem;
+    margin: 10px 0 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rating { color: #facc15; font-weight: bold; }
+
+.divider {
+    height: 1px;
+    background: #334155;
+    margin: 40px 0;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .search-box { flex-direction: column; align-items: center; }
+    input { max-width: 100%; }
+    button { width: 100%; }
 }
