@@ -1,74 +1,94 @@
-const API_KEY = "162f101e";
+const API_KEY = "be5afabb1e2e6f7a6291070ec34bf934";
+const BASE_URL = "https://api.themoviedb.org/3";
+const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
-// Enter key se search support
+// Enter search
 document.getElementById("movieInput").addEventListener("keypress", (e) => {
     if (e.key === "Enter") searchMovie();
 });
 
 async function searchMovie() {
-    const input = document.getElementById("movieInput");
+
+    const movie = document.getElementById("movieInput").value.trim();
     const resultDiv = document.getElementById("movieResult");
-    const movie = input.value;
 
     if (!movie) return;
 
-    resultDiv.innerHTML = `<div class="loader">Magic is happening...</div>`;
+    resultDiv.innerHTML = "Searching...";
 
     try {
-        const res = await fetch(`https://omdbapi.com/?t=${movie}&apikey=${API_KEY}`);
+
+        const res = await fetch(
+            `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${movie}`
+        );
+
         const data = await res.json();
 
-        if (data.Response === "False") {
-            resultDiv.innerHTML = `<p>Oops! Movie nahi mili.</p>`;
-            return;
-        }
+        const movieData = data.results[0];
 
         resultDiv.innerHTML = `
-            <div class="movieCard" style="max-width: 350px; width: 100%;">
-                <img src="${data.Poster !== 'N/A' ? data.Poster : 'https://via.placeholder.com/300x450'}" />
-                <div style="padding: 10px;">
-                    <h3>${data.Title}</h3>
-                    <p class="rating">⭐ ${data.imdbRating} | ${data.Year}</p>
-                    <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 8px;">${data.Plot}</p>
-                </div>
+            <div class="movieCard">
+                <img src="${IMG_URL + movieData.poster_path}">
+                <h3>${movieData.title}</h3>
+                <p class="rating">⭐ ${movieData.vote_average}</p>
+                <p>${movieData.overview}</p>
             </div>
         `;
 
-        recommendMovies(data.Genre.split(",")[0]);
+        recommendMovies(movieData.id);
 
     } catch (err) {
-        console.error(err);
+        console.log(err);
     }
 }
 
-async function recommendMovies(genre) {
-    const recDiv = document.getElementById("recommendations");
-    recDiv.innerHTML = "";
 
-    const genrePool = {
-        "Action": ["The Dark Knight", "John Wick", "Avengers", "Gladiator", "Inception"],
-        "Horror": ["The Conjuring", "It", "Sinister", "A Quiet Place"],
-        "Sci-Fi": ["Interstellar", "Tenet", "The Matrix", "Dune"],
-        "Comedy": ["Hangover", "Deadpool", "Superbad", "Free Guy"],
-        "Drama": ["Forrest Gump", "The Shawshank Redemption", "The Godfather"]
-    };
+// Real Recommendation
+async function recommendMovies(movieId) {
 
-    let moviesList = genrePool[genre.trim()] || ["Avatar", "Titanic", "Inception", "Arrival"];
+const recDiv = document.getElementById("recommendations");
 
-    for (let title of moviesList) {
-        try {
-            const res = await fetch(`https://omdbapi.com/?t=${title}&apikey=${API_KEY}`);
-            const d = await res.json();
+recDiv.innerHTML = "Finding similar movies...";
 
-            if (d.Response !== "False") {
-                recDiv.innerHTML += `
-                    <div class="movieCard">
-                        <img src="${d.Poster}">
-                        <h3>${d.Title}</h3>
-                        <p class="rating">⭐ ${d.imdbRating}</p>
-                    </div>
-                `;
-            }
-        } catch (e) {}
-    }
+try {
+
+// Get Movie Details
+const movieRes = await fetch(
+`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`
+);
+
+const movieData = await movieRes.json();
+
+const genreId = movieData.genres[0].id;
+const language = movieData.original_language;
+
+// Discover similar language movies
+const res = await fetch(
+`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&with_original_language=${language}&sort_by=popularity.desc`
+);
+
+const data = await res.json();
+
+recDiv.innerHTML = "";
+
+const selectedYear = document.getElementById("yearFilter").value;
+
+data.results.forEach(movie => {
+
+if(selectedYear && !movie.release_date.startsWith(selectedYear)) return;
+
+recDiv.innerHTML += `
+<div class="movieCard">
+<img src="${IMG_URL + movie.poster_path}">
+<h3>${movie.title}</h3>
+<p>⭐ ${movie.vote_average}</p>
+<p>${movie.release_date}</p>
+</div>
+`;
+
+});
+
+} catch (err) {
+console.log(err);
+}
 }

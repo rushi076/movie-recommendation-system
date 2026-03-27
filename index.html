@@ -19,6 +19,14 @@
         <div class="search-wrapper">
             <input type="text" id="movieInput" placeholder="Kounsi movie pasand hai? (e.g. Inception)">
             <button onclick="searchMovie()" id="searchBtn">Search</button>
+            <select id="yearFilter">
+<option value="">All Years</option>
+<option value="2024">2024</option>
+<option value="2023">2023</option>
+<option value="2022">2022</option>
+<option value="2021">2021</option>
+<option value="2020">2020</option>
+</select>
         </div>
     </header>
 
@@ -33,6 +41,7 @@
         <div id="recommendations" class="movie-grid"></div>
     </main>
 </div>
+
 
 <script src="script.js"></script>
 </body>
