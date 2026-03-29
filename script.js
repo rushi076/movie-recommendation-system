@@ -51,7 +51,6 @@ recDiv.innerHTML = "Finding similar movies...";
 
 try {
 
-// Get Movie Details
 const movieRes = await fetch(
 `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`
 );
@@ -61,7 +60,6 @@ const movieData = await movieRes.json();
 const genreId = movieData.genres[0].id;
 const language = movieData.original_language;
 
-// Discover similar language movies
 const res = await fetch(
 `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&with_original_language=${language}&sort_by=popularity.desc`
 );
@@ -93,49 +91,114 @@ console.log(err);
 }
 
 
-// Open Movie Player
+// NETMIRROR STYLE PLAYER
+
 async function openMovie(movieId){
 
 const player = document.getElementById("moviePlayer");
 
-player.innerHTML = "Loading movie...";
+player.innerHTML = "Finding Best Movie Source...";
 
 try{
 
-const res = await fetch(
-`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
+const movieRes = await fetch(
+`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`
 );
 
-const data = await res.json();
+const movieData = await movieRes.json();
 
-const trailer = data.results.find(
-video => video.type === "Trailer"
-);
-
-if(!trailer){
-player.innerHTML = "Trailer not available";
-return;
-}
+const movieName = movieData.title;
+const year = movieData.release_date?.split("-")[0];
 
 player.innerHTML = `
+
 <div class="playerBox">
-<iframe 
-width="100%" 
-height="500"
-src="https://www.youtube.com/embed/${trailer.key}"
-frameborder="0"
-allowfullscreen>
-</iframe>
+
+<h2>${movieName} (${year})</h2>
+
+<div id="videoPlayer">
+Searching Best Source...
 </div>
+
+</div>
+
 `;
+
+playBestSource(movieId);
 
 window.scrollTo({
 top: player.offsetTop,
-behavior: "smooth"
+behavior:"smooth"
 });
 
 }catch(err){
 console.log(err);
 }
+
+}
+
+
+// SMART AUTO DETECT PLAYER
+
+function playBestSource(id){
+
+const sources = [
+
+`https://vidsrc.me/embed/movie?tmdb=${id}`,
+//`https://multiembed.mov/?video_id=${id}&tmdb=1`,
+//`https://player.autoembed.app/embed/movie/${id}`,
+//`https://vidbinge.to/movie/${id}`
+
+];
+
+window.open(sources[0],"_blank");
+
+}
+
+let index = 0;
+
+function tryNext(){
+
+if(index >= sources.length){
+
+document.getElementById("videoPlayer").innerHTML = `
+<h3>Movie Not Found</h3>
+<button onclick="openExternal('${id}')">
+Search On Web
+</button>
+`;
+
+return;
+}
+
+const iframe = document.createElement("iframe");
+
+window.open(sources[index],"_blank");
+iframe.width = "100%";
+iframe.height = "500";
+iframe.allowFullscreen = true;
+
+iframe.onerror = () => {
+index++;
+tryNext();
+};
+
+document.getElementById("videoPlayer").innerHTML = "";
+document.getElementById("videoPlayer").appendChild(iframe);
+
+}
+
+tryNext();
+
+
+
+// FINAL FALLBACK
+
+function openExternal(id){
+
+window.open(
+`https://www.google.com/search?q=watch+movie+${id}+online+free`,
+"_blank"
+);
 
 }
