@@ -23,11 +23,10 @@ async function searchMovie() {
         );
 
         const data = await res.json();
-
         const movieData = data.results[0];
 
         resultDiv.innerHTML = `
-            <div class="movieCard">
+            <div class="movieCard" onclick="openMovie(${movieData.id})">
                 <img src="${IMG_URL + movieData.poster_path}">
                 <h3>${movieData.title}</h3>
                 <p class="rating">⭐ ${movieData.vote_average}</p>
@@ -78,7 +77,7 @@ data.results.forEach(movie => {
 if(selectedYear && !movie.release_date.startsWith(selectedYear)) return;
 
 recDiv.innerHTML += `
-<div class="movieCard">
+<div class="movieCard" onclick="openMovie(${movie.id})">
 <img src="${IMG_URL + movie.poster_path}">
 <h3>${movie.title}</h3>
 <p>⭐ ${movie.vote_average}</p>
@@ -91,4 +90,52 @@ recDiv.innerHTML += `
 } catch (err) {
 console.log(err);
 }
+}
+
+
+// Open Movie Player
+async function openMovie(movieId){
+
+const player = document.getElementById("moviePlayer");
+
+player.innerHTML = "Loading movie...";
+
+try{
+
+const res = await fetch(
+`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
+);
+
+const data = await res.json();
+
+const trailer = data.results.find(
+video => video.type === "Trailer"
+);
+
+if(!trailer){
+player.innerHTML = "Trailer not available";
+return;
+}
+
+player.innerHTML = `
+<div class="playerBox">
+<iframe 
+width="100%" 
+height="500"
+src="https://www.youtube.com/embed/${trailer.key}"
+frameborder="0"
+allowfullscreen>
+</iframe>
+</div>
+`;
+
+window.scrollTo({
+top: player.offsetTop,
+behavior: "smooth"
+});
+
+}catch(err){
+console.log(err);
+}
+
 }
