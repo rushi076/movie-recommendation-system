@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CineMagic - Register</title>
+
+<link rel="stylesheet" href="Register.css">
+
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="register-box">
+
+<h1>CineMagic</h1>
+<h2>Create Account</h2>
+
+<!-- Name -->
+<input 
+type="text" 
+id="name" 
+placeholder="Full Name"
+>
+
+<!-- Email -->
+<input 
+type="email" 
+id="email" 
+placeholder="Email Address"
+>
+
+<!-- Password -->
+<input 
+type="password" 
+id="password" 
+placeholder="Password"
+>
+
+<button onclick="registerUser()">Register</button>
+
+<div class="divider">
+<span>OR</span>
+</div>
+
+<!-- Google Login -->
+<button onclick="googleRegister()" class="google-btn">
+<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+Continue with Google
+</button>
+
+<p>
+Already have account?
+<a href="Login.html">Sign In</a>
+</p>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script src="Firebase.js"></script>
+<script src="Register.js"></script>
+
+</body>
+
+</html>

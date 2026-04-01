@@ -2,6 +2,14 @@ const API_KEY = "be5afabb1e2e6f7a6291070ec34bf934";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
+firebase.auth().onAuthStateChanged((user)=>{
+
+if(!user){
+window.location.href="Login.html";
+}
+
+});
+
 // Enter search
 document.getElementById("movieInput").addEventListener("keypress", (e) => {
     if (e.key === "Enter") searchMovie();
@@ -200,5 +208,16 @@ window.open(
 `https://www.google.com/search?q=watch+movie+${id}+online+free`,
 "_blank"
 );
+
+}
+
+function logout(){
+
+firebase.auth().signOut()
+.then(()=>{
+
+window.location.href="Login.html";
+
+})
 
 }

@@ -212,3 +212,18 @@ border-radius:5px;
 .playerBox{
 margin-top:30px;
 }
+
+.top-bar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logout-btn{
+background:#ff3d3d;
+border:none;
+padding:8px 15px;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
