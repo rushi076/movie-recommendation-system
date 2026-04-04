@@ -202,17 +202,13 @@ Add your Firebase config in JS file
 Open index.html in browser
 
 ---
-
 ## 📸 Screenshots
 
-### Home Screen
-![Home](cinemagic-home.jpeg)
-
-### Search Result
-![Search](cinemagic-search.jpeg)
-
-### Recommended Movies
-![Recommended](cinemagic-recommend.jpeg)
+<p align="center">
+  <img src="cinemagic-home.jpeg" width="30%">
+  <img src="cinemagic-search.jpeg" width="30%">
+  <img src="cinemagic-recommend.jpeg" width="30%">
+</p>
 
 ---
 
