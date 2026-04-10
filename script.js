@@ -221,3 +221,21 @@ window.location.href="Login.html";
 })
 
 }
+
+
+// VOICE SEARCH
+function startVoice(){
+    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.start();
+
+    recognition.onstart = ()=>{ console.log("Listening..."); };
+    recognition.onresult = function(event){
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("movieInput").value = transcript;
+        searchMovie();
+        searchSeries();
+    };
+    recognition.onerror = ()=>{ alert("Voice search not supported"); };
+}

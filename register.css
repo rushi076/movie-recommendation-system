@@ -78,27 +78,6 @@ color:white;
 text-decoration:none;
 }
 
-.phone-box{
-display:flex;
-background:#333;
-border-radius:4px;
-margin:10px 0;
-overflow:hidden;
-}
-
-.phone-box span{
-padding:12px;
-background:#222;
-color:white;
-}
-
-.phone-box input{
-border:none;
-background:transparent;
-color:white;
-width:100%;
-padding:12px;
-}
 
 @media(max-width:500px){
 

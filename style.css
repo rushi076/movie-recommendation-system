@@ -227,3 +227,18 @@ color:white;
 border-radius:5px;
 cursor:pointer;
 }
+
+.mic-btn{
+background:#4e5c64;
+border:none;
+padding:10px 15px;
+border-radius:50%;
+cursor:pointer;
+font-size:18px;
+margin:0 5px;
+color:white;
+}
+
+.mic-btn:hover{
+background:#ff0000;
+}
