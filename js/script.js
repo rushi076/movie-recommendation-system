@@ -1,25 +1,4 @@
-// Navbar Scroll Effect
-window.addEventListener("scroll", () => {
-    const navbar = document.getElementById("navbar");
-    if (navbar) {
-        if (window.scrollY > 50) {
-            navbar.classList.add("scrolled");
-        } else {
-            navbar.classList.remove("scrolled");
-        }
-    }
-});
-
-// Search Toggle
-function toggleSearch() {
-    const searchContainer = document.getElementById("searchContainer");
-    if(searchContainer) {
-        searchContainer.classList.toggle("active");
-        if (searchContainer.classList.contains("active")) {
-            document.getElementById("movieInput").focus();
-        }
-    }
-}
+// UI Logic (Scroll/Search/Drawer) now handled in navbar.js
 
 // Generate Movie Card UI
 function createMovieCard(movie, defaultType = 'movie') {

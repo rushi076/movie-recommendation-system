@@ -9,9 +9,26 @@
 </head>
 <body>
 
+    <!-- Side Drawer for Mobile -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <a href="index.html" class="logo">CineMagic</a>
+            <i class="fas fa-times" id="closeDrawer"></i>
+        </div>
+        <ul class="drawer-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="#">TV Shows</a></li>
+            <li><a href="#">Movies</a></li>
+            <li><a href="#">New & Popular</a></li>
+            <li><a href="watchlist.html">My List</a></li>
+        </ul>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <div class="nav-left">
+            <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
             <a href="index.html" class="logo">CineMagic</a>
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Home</a></li>
@@ -144,6 +161,7 @@
     
     <script src="js/firebase.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
     <script src="js/recommendation.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/script.js"></script>
