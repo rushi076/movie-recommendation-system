@@ -1,75 +1,151 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineMagic | AI Movie Recommender</title>
-
-<link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMagic | Movies & Shows</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
-<div class="background-glow"></div>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-left">
+            <a href="index.html" class="logo">CineMagic</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="#">TV Shows</a></li>
+                <li><a href="#">Movies</a></li>
+                <li><a href="#">New & Popular</a></li>
+                <li><a href="#">My List</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <div class="search-container" id="searchContainer">
+                <input type="text" class="search-input" id="movieInput" placeholder="Titles, people, genres">
+                <button class="search-icon" onclick="toggleSearch()"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="profile-dropdown">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" class="profile-avatar">
+                <div class="dropdown-menu">
+                    <a href="dashboard.html" id="adminLink" style="display:none;">Admin Dashboard</a>
+                    <button onclick="logout()">Sign out of CineMagic</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<div class="app-container">
+    <main>
+        <!-- Hero Section -->
+        <div class="hero" id="heroBanner">
+            <div class="hero-overlay"></div>
+            <div class="hero-content" id="heroContent">
+                <!-- Data injected by JS -->
+                <h1 class="hero-title skeleton">Loading Title</h1>
+                <p class="hero-desc skeleton" style="height: 60px;">...</p>
+                <div class="hero-buttons" style="opacity: 0;">
+                    <button class="btn btn-primary"><i class="fas fa-play"></i> Play</button>
+                    <button class="btn btn-secondary"><i class="fas fa-info-circle"></i> More Info</button>
+                </div>
+            </div>
+        </div>
 
-<header>
+        <div class="app-container">
+            <!-- Search Results (Hidden by default) -->
+            <div class="section-wrapper" id="searchResultsSection" style="display:none;">
+                <h2 class="section-title">Search Results</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="searchResults"></div>
+                </div>
+            </div>
 
-<div class="top-bar">
-<h1 class="logo">🎬 Cine<span>Magic</span></h1>
+            <!-- Trending Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Trending Now</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="trendingMovies">
+                        <!-- Skeletons -->
+                        <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
 
-<button onclick="logout()" class="logout-btn">
-Logout
-</button>
+            <!-- Recommended Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Recommended For You</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="recommendedMovies">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <!-- Popular Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Popular on CineMagic</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="popularMovies">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
 
-<p class="tagline">Movie Recommendation System</p>
+            <!-- Top Rated Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Top Rated</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="topRatedMovies">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Web Series Sections -->
+            <div class="section-wrapper" style="margin-top: 50px;">
+                <h2 class="section-title" style="color:var(--accent-color); font-size:2rem;">Web Series</h2>
+            </div>
 
-<div class="search-wrapper">
-<input type="text" id="movieInput" placeholder="Kounsi movie pasand hai? (e.g. Inception)">
-<button onclick="startVoice()" class="mic-btn">🎙️</button>
-<button onclick="searchMovie()" id="searchBtn">Search</button>
+            <!-- Trending TV Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Trending Web Series</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="trendingTV">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
 
-<select id="yearFilter">
-<option value="">All Years</option>
-<option value="2024">2024</option>
-<option value="2023">2023</option>
-<option value="2022">2022</option>
-<option value="2021">2021</option>
-<option value="2020">2020</option>
-</select>
+            <!-- Popular TV Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Popular Web Series</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="popularTV">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <!-- Top Rated TV Section -->
+            <div class="section-wrapper">
+                <h2 class="section-title">Top Rated Web Series</h2>
+                <div class="carousel-container">
+                    <div class="carousel" id="topRatedTV">
+                         <div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div><div class="movie-card skeleton"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-</header>
-
-<main>
-
-<div id="movieResult" class="featured-result"></div>
-
-<div class="section-title">
-<h2>Recommended for You</h2>
-<div class="line"></div>
-<div id="moviePlayer"></div>
-</div>
-
-<div id="recommendations" class="movie-grid"></div>
-
-</main>
-
-</div>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-<script src="Firebase.js"></script>
-<script src="script.js"></script>
-
+    <!-- Firebase SDK (v9 Compat for ease based on current code) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/recommendation.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
 </body>
-
 </html>

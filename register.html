@@ -1,82 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>CineMagic - Register</title>
-
-<link rel="stylesheet" href="Register.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CineMagic</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Sign Up</h2>
+            <div class="auth-error" id="errorMsg"></div>
+            <form class="auth-form" id="registerForm">
+                <input type="text" id="username" placeholder="Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password (min 6 characters)" required minlength="6">
+                <button type="submit" id="submitBtn">Sign Up</button>
+            </form>
+            <div class="auth-bottom">
+                <p>Already have an account? <a href="login.html">Sign in now.</a></p>
+            </div>
+        </div>
+    </div>
 
-<div class="overlay"></div>
-
-<div class="register-box">
-
-<h1>CineMagic</h1>
-<div class="divider">
-</div>
-<h4>Create Account</h4>
-
-<!-- Name -->
- <!--
-<input 
-type="text" 
-id="name" 
-placeholder="Full Name"
->
-
-<-- Email -->
-<!--
-<input 
-type="email" 
-id="email" 
-placeholder="Email Address"
->
-
-<-- Password -->
-
-<!--
-<input 
-type="password" 
-id="password" 
-placeholder="Password"
->
-
-<button onclick="registerUser()">Register</button>
-
-<div class="divider">
-<span>OR</span>
-</div>
-
-<!-- Google Login -->
-<button onclick="googleRegister()" class="google-btn">
-<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
-Continue with Google
-</button>
-
-<div class="divider">
-<span>OR</span>
-</div>
-
-<p>
-Already have account?
-<a href="Login.html">Sign In</a>
-</p>
-
-</div>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-<script src="Firebase.js"></script>
-<script src="Register.js"></script>
-
+    <!-- Firebase SDK (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            btn.innerText = "Signing up...";
+            btn.disabled = true;
+            errorMsg.innerText = "";
+            
+            const name = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                await window.registerUser(email, password, name);
+            } catch (err) {
+                errorMsg.innerText = err.message;
+                btn.innerText = "Sign Up";
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
-
 </html>

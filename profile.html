@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - CineMagic</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-header {
+            padding: 100px 4% 40px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-left">
+            <a href="index.html" class="logo">CineMagic</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="watchlist.html">My List</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="profile-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="profile-avatar-large">
+        <div class="profile-info">
+            <h1 id="userName">User Profile</h1>
+            <p id="userEmail">Loading...</p>
+            <button class="btn btn-primary" onclick="logout()">Sign Out</button>
+        </div>
+    </div>
+
+    <div class="app-container" style="padding-top: 0;">
+        <div class="section-wrapper">
+            <h2 class="section-title">My Watchlist</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="listWatchlist"></div>
+            </div>
+        </div>
+
+        <div class="section-wrapper">
+            <h2 class="section-title">Liked Titles</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="listLiked"></div>
+            </div>
+        </div>
+
+        <div class="section-wrapper">
+            <h2 class="section-title">Recently Viewed</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="listRecent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            document.getElementById('userName').innerText = user.displayName || "CineMagic User";
+            document.getElementById('userEmail').innerText = user.email;
+
+            if (window.db) {
+                const doc = await db.collection("users").doc(user.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    renderList(data.watchlist || [], 'listWatchlist');
+                    renderList(data.likedMovies || [], 'listLiked');
+                    renderList(data.recentlyViewed || [], 'listRecent');
+                }
+            }
+        });
+
+        async function renderList(itemsArray, containerId) {
+            const container = document.getElementById(containerId);
+            if (itemsArray.length === 0) {
+                container.innerHTML = "<p style='padding:20px; color:var(--text-muted);'>No items here yet.</p>";
+                return;
+            }
+
+            let html = "";
+            for (let i = itemsArray.length - 1; i >= Math.max(0, itemsArray.length - 15); i--) {
+                const item = itemsArray[i];
+                const type = typeof item === 'string' ? item.split('_')[0] : 'movie';
+                const id = typeof item === 'string' ? item.split('_')[1] : item;
+
+                try {
+                    const m = await window.api.getMovieDetails(id, type);
+                    if (m && m.poster_path) {
+                        const poster = `${window.api.IMG_URL}${m.poster_path}`;
+                        const title = m.title || m.name;
+                        html += `
+                            <div class="movie-card" onclick="window.open('movie.html?id=${id}&type=${type}', '_blank')">
+                                <img src="${poster}" alt="${title}">
+                                <div class="movie-overlay">
+                                    <h4>${title}</h4>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } catch (e) { }
+            }
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

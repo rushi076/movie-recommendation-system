@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMagic | Details</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .detail-hero {
+            position: relative;
+            background-size: cover;
+            background-position: center top;
+            height: 70vh;
+        }
+        .detail-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(0deg, var(--bg-main) 0%, rgba(20,20,20,0.8) 100%);
+        }
+        .trailer-container { margin-top: 40px; }
+        iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 8px; }
+        
+        .providers-list { display: flex; gap: 10px; margin-top: 15px; align-items: center; }
+        .provider-icon { width: 40px; height: 40px; border-radius: 8px; }
+        
+        .seasons-section { margin-top: 40px; }
+        .season-selector { 
+            background: #333; color: white; padding: 10px; border: none; border-radius: 4px;
+            font-size: 1rem; margin-bottom: 20px; font-family: inherit;
+        }
+        .episodes-list { display: flex; flex-direction: column; gap: 20px; }
+        .episode-card { 
+            display: flex; gap: 20px; background: var(--card-bg); padding: 15px; border-radius: 8px;
+            align-items: center; 
+        }
+        .episode-img { width: 150px; border-radius: 4px; flex-shrink: 0; }
+        .episode-info h4 { margin-bottom: 5px; }
+        .episode-info p { font-size: 0.9rem; color: var(--text-muted); }
+
+        @media(max-width: 768px) {
+            .episode-card { flex-direction: column; align-items: flex-start; }
+            .episode-img { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-left">
+            <a href="index.html" class="logo">CineMagic</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <div class="profile-dropdown">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" class="profile-avatar">
+                <div class="dropdown-menu">
+                    <a href="profile.html">My Profile</a>
+                    <a href="watchlist.html">Watchlist</a>
+                    <a href="dashboard.html" id="adminLink" style="display:none;">Admin</a>
+                    <button onclick="logout()">Sign out of CineMagic</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="movieContent">
+        <!-- Injected via JS -->
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+        const mediaType = urlParams.get('type') || 'movie';
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!movieId) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const movie = await window.api.getMovieDetails(movieId, mediaType);
+            
+            if(!movie) {
+                document.getElementById('movieContent').innerHTML = "<h1 style='padding:100px; text-align:center;'>Title not found.</h1>";
+                return;
+            }
+
+            // Auth Check for Admin Link & Viewing tracking
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user && window.db) {
+                    const typeIdStr = `${mediaType}_${movieId}`; 
+                    db.collection("users").doc(user.uid).update({
+                        recentlyViewed: firebase.firestore.FieldValue.arrayUnion(typeIdStr)
+                    });
+                    
+                    db.collection("users").doc(user.uid).get().then(doc => {
+                        if (doc.exists && doc.data().role === 'admin') {
+                            document.getElementById("adminLink").style.display = "block";
+                        }
+                    });
+                }
+            });
+
+            // Details 
+            const title = movie.title || movie.name;
+            const bgImage = movie.backdrop_path ? `${window.api.ORIGINAL_IMG_URL}${movie.backdrop_path}` : `${window.api.ORIGINAL_IMG_URL}${movie.poster_path}`;
+            const posterImage = movie.poster_path ? `${window.api.IMG_URL}${movie.poster_path}` : 'https://via.placeholder.com/300x450';
+            const year = (movie.release_date || movie.first_air_date || 'N/A').substring(0,4);
+            const runtime = movie.runtime ? `${Math.floor(movie.runtime/60)}h ${movie.runtime%60}m` : (movie.episode_run_time?.[0] ? `${movie.episode_run_time[0]}m/ep` : 'N/A');
+            const rating = (movie.vote_average || 0).toFixed(1);
+            const genres = movie.genres.map(g => g.name).join(", ");
+            
+            // Watch Providers
+            const provData = await window.api.getProviders(movieId, mediaType);
+            let providersHTML = '';
+            
+            // Watch Now Button ALWAYS pointing to internal player
+            let watchLinkHTML = '';
+            if (mediaType === 'movie') {
+                watchLinkHTML = `<button class="btn btn-primary" style="background:#e50914; color:white;" onclick="window.location.href='player.html?id=${movieId}&type=movie'"><i class="fas fa-play"></i> Watch Now</button>`;
+            } else {
+                watchLinkHTML = `<button class="btn btn-primary" style="background:#e50914; color:white;" onclick="window.location.href='player.html?id=${movieId}&type=tv&season=1&episode=1'"><i class="fas fa-play"></i> Watch Now</button>`;
+            }
+            
+            if (provData) {
+                // Default to India, fallback to US
+                const regionData = provData['IN'] || provData['US'];
+                if (regionData && regionData.flatrate) {
+                    providersHTML += `<div style="margin-top: 15px;"><b style="color:white; display:block; margin-bottom:5px;">Streaming on:</b><div class="providers-list">`;
+                    regionData.flatrate.forEach(prov => {
+                        providersHTML += `<img src="${window.api.IMG_URL}${prov.logo_path}" title="${prov.provider_name}" class="provider-icon">`;
+                    });
+                    providersHTML += `</div></div>`;
+                }
+            }
+
+            // YouTube Trailer
+            const trailer = movie.videos?.results.find(vid => vid.site === "YouTube" && vid.type === "Trailer");
+            let trailerHTML = '';
+            if (trailer) {
+                trailerHTML = `
+                    <div class="trailer-container">
+                        <h2 class="section-title">Trailer</h2>
+                        <iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>
+                    </div>
+                `;
+            }
+
+            // Cast
+            let castHTML = '';
+            if (movie.credits && movie.credits.cast) {
+                const cast = movie.credits.cast.slice(0, 5).map(c => c.name).join(", ");
+                castHTML = `<p style="margin-bottom: 20px;"><b style="color:white;">Starring:</b> <span style="color:var(--text-muted);">${cast}</span></p>`;
+            }
+
+            // Seasons Support
+            let seasonsHTML = '';
+            if (mediaType === 'tv' && movie.seasons && movie.seasons.length > 0) {
+                seasonsHTML = `<div class="seasons-section">
+                    <h2 class="section-title">Episodes</h2>
+                    <select class="season-selector" id="seasonSelect" onchange="loadSeason(this.value)">
+                        ${movie.seasons.map(s => `<option value="${s.season_number}">${s.name}</option>`).join("")}
+                    </select>
+                    <div class="episodes-list" id="episodesList"></div>
+                </div>`;
+            }
+
+            document.getElementById('movieContent').innerHTML = `
+                <div class="detail-hero" style="background-image: url('${bgImage}')">
+                    <div class="detail-overlay"></div>
+                </div>
+                
+                <div class="detail-content">
+                    <img src="${posterImage}" class="detail-poster" alt="${title}">
+                    
+                    <div class="detail-info">
+                        <h1>${title}</h1>
+                        <div class="detail-meta">
+                            <span class="rating">${rating} Rating</span>
+                            <span>${year}</span>
+                            <span>${runtime}</span>
+                            <span>HD</span>
+                        </div>
+                        <p style="margin-bottom: 10px; color:var(--text-muted);">${genres}</p>
+                        <p class="detail-desc">${movie.overview}</p>
+                        ${castHTML}
+                        
+                        <div class="hero-buttons">
+                            ${watchLinkHTML}
+                            <button class="btn btn-secondary" onclick="toggleAction('likedMovies')"><i class="fas fa-heart"></i> <span id="likeText">Like</span></button>
+                            <button class="btn btn-secondary" onclick="toggleAction('watchlist')"><i class="fas fa-plus"></i> <span id="watchText">Watchlist</span></button>
+                        </div>
+
+                        ${providersHTML}
+                        ${seasonsHTML}
+                        ${trailerHTML}
+                    </div>
+                </div>
+            `;
+
+            // Load Initial Season if TV
+            if(mediaType === 'tv' && movie.seasons && movie.seasons.length > 0) {
+                // Ignore Season 0 (Specials) if there is a Season 1
+                const firstSeason = movie.seasons.find(s => s.season_number === 1) ? 1 : movie.seasons[0].season_number;
+                document.getElementById('seasonSelect').value = firstSeason;
+                loadSeason(firstSeason);
+            }
+
+            setTimeout(checkUserActions, 1000); // Give auth time to load
+        });
+
+        async function loadSeason(seasonNumber) {
+            const epList = document.getElementById('episodesList');
+            epList.innerHTML = '<p>Loading episodes...</p>';
+            const data = await window.api.getSeasonDetails(movieId, seasonNumber);
+            
+            if(data && data.episodes) {
+                epList.innerHTML = data.episodes.map(ep => {
+                    const thumb = ep.still_path ? `${window.api.IMG_URL}${ep.still_path}` : 'https://via.placeholder.com/300x170?text=No+Image';
+                    const runtime = ep.runtime ? `${ep.runtime}m` : '';
+                    return `
+                        <div class="episode-card" style="cursor:pointer; transition: 0.2s;" onmouseover="this.style.background='#444'" onmouseout="this.style.background='var(--card-bg)'" onclick="window.location.href='player.html?id=${movieId}&type=tv&season=${seasonNumber}&episode=${ep.episode_number}'">
+                            <img src="${thumb}" class="episode-img">
+                            <div class="episode-info">
+                                <h4><i class="fas fa-play-circle" style="color:var(--accent-color); margin-right:5px;"></i> ${ep.episode_number}. ${ep.name}</h4>
+                                <p style="margin-bottom:5px;">${new Date(ep.air_date).toLocaleDateString()} &bull; ${runtime} &bull; ⭐ ${(ep.vote_average || 0).toFixed(1)}</p>
+                                <p>${ep.overview || 'No description available for this episode.'}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                epList.innerHTML = '<p>No episodes found.</p>';
+            }
+        }
+
+        function checkUserActions() {
+            const user = firebase.auth().currentUser;
+            if(!user || !window.db) return;
+
+            const typeIdStr = `${mediaType}_${movieId}`; 
+
+            db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if(data.likedMovies && data.likedMovies.includes(typeIdStr)) {
+                        document.getElementById('likeText').innerText = "Liked";
+                    }
+                    if(data.watchlist && data.watchlist.includes(typeIdStr)) {
+                        document.getElementById('watchText').innerText = "In Watchlist";
+                    }
+                }
+            });
+        }
+
+        async function toggleAction(listType) {
+            const user = firebase.auth().currentUser;
+            if(!user || !window.db) {
+                alert("Please log in to perform this action.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const typeIdStr = `${mediaType}_${movieId}`; 
+            const docRef = db.collection("users").doc(user.uid);
+            
+            try {
+                const doc = await docRef.get();
+                const list = doc.data()[listType] || [];
+                
+                if (list.includes(typeIdStr)) {
+                    await docRef.update({ [listType]: firebase.firestore.FieldValue.arrayRemove(typeIdStr) });
+                    document.getElementById(listType === 'likedMovies' ? 'likeText' : 'watchText').innerText = listType === 'likedMovies' ? "Like" : "Watchlist";
+                } else {
+                    await docRef.update({ [listType]: firebase.firestore.FieldValue.arrayUnion(typeIdStr) });
+                    document.getElementById(listType === 'likedMovies' ? 'likeText' : 'watchText').innerText = listType === 'likedMovies' ? "Liked" : "In Watchlist";
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
