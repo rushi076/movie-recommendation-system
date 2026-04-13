@@ -73,3 +73,11 @@ function logout() {
 window.loginUser = loginUser;
 window.registerUser = registerUser;
 window.logout = logout;
+
+// Global Mobile Menu Toggle
+window.toggleMobileMenu = function() {
+    const navLinks = document.getElementById("navLinks");
+    if(navLinks) {
+        navLinks.classList.toggle("active");
+    }
+};
