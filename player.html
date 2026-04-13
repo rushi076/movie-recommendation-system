@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMagic Player</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            overflow: hidden; /* Hide scrollbars in player mode */
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Netflix-style Header overlaid on video */
+        .player-header {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 20px 4%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 20px;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .video-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .video-meta {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-left: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Iframe */
+        .stream-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 10;
+        }
+
+        /* Loader */
+        .loader-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5; /* Behind iframe so it hides when iframe loads opaque naturally, but iframe might take time, so we hide manually */
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(229, 9, 20, 0.3);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-wrapper">
+        <div class="player-header" id="playerHeader">
+            <button class="back-btn" onclick="goBack()" title="Back"><i class="fas fa-arrow-left"></i></button>
+            <div id="titleContainer">
+                <span class="video-title" id="videoTitle">Loading...</span>
+                <span class="video-meta" id="videoMeta"></span>
+            </div>
+        </div>
+
+        <div class="loader-container" id="playerLoader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: var(--text-muted);">Connecting to Streaming Server...</p>
+        </div>
+
+        <iframe id="videoIframe" class="stream-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Idle detection for header
+        let idleTimer;
+        const playerHeader = document.getElementById('playerHeader');
+        
+        function resetIdleTimer() {
+            playerHeader.style.opacity = '1';
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                playerHeader.style.opacity = '0';
+            }, 3000); // hide after 3 seconds of no mouse movement
+        }
+
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('touchstart', resetIdleTimer);
+        resetIdleTimer();
+
+        // Param parsing
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const type = params.get('type') || 'movie';
+        let season = params.get('season') || 1;
+        let episode = params.get('episode') || 1;
+
+        function goBack() {
+            if(document.referrer.includes('movie.html')) {
+                window.history.back();
+            } else {
+                // Fallback direct build
+                window.location.href = `movie.html?id=${id}&type=${type}`;
+            }
+        }
+
+        if (!id) {
+            alert("No video ID provided.");
+            window.location.href = "index.html";
+        }
+
+        async function initPlayer() {
+            const iframe = document.getElementById('videoIframe');
+            const loader = document.getElementById('playerLoader');
+            
+            // Build Src
+            let streamUrl = "";
+            if (type === 'movie') {
+                streamUrl = `https://vidsrcme.ru/embed/movie?tmdb=${id}`;
+            } else {
+                streamUrl = `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+            }
+
+            // Fetch Title for header (Optional but requested for polish)
+            try {
+                const details = await window.api.getMovieDetails(id, type);
+                if (details) {
+                    document.getElementById('videoTitle').innerText = details.title || details.name;
+                    if (type === 'tv') {
+                        document.getElementById('videoMeta').innerText = `| S${season} E${episode}`;
+                    } else if (details.release_date) {
+                        document.getElementById('videoMeta').innerText = `(${details.release_date.substring(0,4)})`;
+                    }
+                }
+            } catch(e) {
+                document.getElementById('videoTitle').innerText = "Streaming Video";
+            }
+
+            // Load iframe
+            iframe.onload = () => {
+                loader.style.display = 'none'; // hide loader once loaded
+            };
+            
+            iframe.src = streamUrl;
+        }
+
+        initPlayer();
+    </script>
+</body>
+</html>

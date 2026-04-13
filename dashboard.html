@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CineMagic</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-nav {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--card-bg);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .data-table th {
+            background: rgba(0,0,0,0.5);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar admin-nav">
+        <div class="nav-left">
+            <a href="index.html" class="logo">CineMagic <span style="font-size:1rem; color:var(--text-muted); font-weight:400;">| Admin</span></a>
+        </div>
+        <div class="nav-right">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Store</button>
+        </div>
+    </nav>
+
+    <main class="admin-container" id="adminContent" style="display:none;">
+        <h1 class="section-title" style="margin-bottom: 30px;">Platform Analytics</h1>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Registered Users</h3>
+                <div class="value" id="statTotalUsers">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Users (7 Days)</h3>
+                <div class="value" id="statActiveUsers">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Likes</h3>
+                <div class="value" id="statTotalLikes">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Most Liked Movie/TV</h3>
+                <div class="value" id="statTopLiked" style="font-size:1.2rem; margin-top:10px;">--</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-box">
+                <h3 style="margin-bottom: 15px;">Most Searched Terms / Genres</h3>
+                <canvas id="searchChart" width="400" height="250"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3 style="margin-bottom: 15px;">User Roles Distribution</h3>
+                <canvas id="roleChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px;">
+            <h2 class="section-title">Recent Users</h2>
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                <tbody id="usersList">
+                </tbody>
+            </table>
+        </div>
+    </main>
+    
+    <div id="unauthorizedMsg" style="display:none; padding: 150px 20px; text-align:center;">
+        <h2>Unauthorized Access</h2>
+        <p>You must be an administrator to view this page.</p>
+        <br>
+        <button class="btn btn-primary" style="margin:0 auto;" onclick="window.location.href='index.html'">Go Home</button>
+    </div>
+
+    <!-- Firebase SDK (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
