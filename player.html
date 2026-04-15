@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,15 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             background-color: #000;
-            overflow: hidden; /* Hide scrollbars in player mode */
+            overflow: hidden;
+            /* Hide scrollbars in player mode */
             font-family: 'Inter', sans-serif;
             color: white;
         }
@@ -26,16 +31,23 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Netflix-style Header overlaid on video */
         .player-header {
             position: absolute;
-            top: 0; left: 0; width: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
             padding: 20px 4%;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
             display: flex;
             align-items: center;
             z-index: 100;
@@ -51,6 +63,7 @@
             margin-right: 20px;
             transition: transform 0.2s;
         }
+
         .back-btn:hover {
             transform: scale(1.1);
         }
@@ -58,14 +71,14 @@
         .video-title {
             font-size: 1.2rem;
             font-weight: 600;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
         }
 
         .video-meta {
             font-size: 0.9rem;
             color: var(--text-secondary);
             margin-left: 10px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
         }
 
         /* Iframe */
@@ -79,14 +92,16 @@
         /* Loader */
         .loader-container {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            z-index: 5; /* Behind iframe so it hides when iframe loads opaque naturally, but iframe might take time, so we hide manually */
+            z-index: 5;
+            /* Behind iframe so it hides when iframe loads opaque naturally, but iframe might take time, so we hide manually */
         }
-        
+
         .spinner {
             width: 50px;
             height: 50px;
@@ -97,11 +112,98 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Server Selector Stylings */
+        .server-container {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .server-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .server-select {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .server-select:hover {
+            border-color: var(--accent-color);
+        }
+
+        .server-select option {
+            background: #141414;
+            color: white;
+        }
+
+        .status-msg {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: none;
+            z-index: 100;
+        }
+
+        .backup-badge {
+            position: absolute;
+            top: 80px;
+            right: 4%;
+            background: rgba(229, 9, 20, 0.8);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 90;
+            display: none;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="player-wrapper">
@@ -111,22 +213,36 @@
                 <span class="video-title" id="videoTitle">Loading...</span>
                 <span class="video-meta" id="videoMeta"></span>
             </div>
+            <div class="server-container">
+                <span class="server-label">Server</span>
+                <select id="serverSelector" class="server-select"
+                    onchange="window.streamManager.switchToProvider(parseInt(this.value))">
+                    <option value="0">▶ VidSrc Server 1</option>
+                    <option value="1">▶ VidSrc Server 2</option>
+                    <option value="2">▶ VidSrc Server 3</option>
+                    <option value="3">▶ YouTube (Backup)</option>
+                </select>
+            </div>
         </div>
 
         <div class="loader-container" id="playerLoader">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; color: var(--text-muted);">Connecting to Streaming Server...</p>
+            <p style="margin-top: 15px; color: var(--text-muted);">Connecting to Stream...</p>
         </div>
+
+        <div id="streamingStatus" class="status-msg">Source not available. Select another server.</div>
+        <div id="backupBadge" class="backup-badge">Playing from YouTube Source</div>
 
         <iframe id="videoIframe" class="stream-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/stream-manager.js"></script>
     <script>
         // Idle detection for header
         let idleTimer;
         const playerHeader = document.getElementById('playerHeader');
-        
+
         function resetIdleTimer() {
             playerHeader.style.opacity = '1';
             clearTimeout(idleTimer);
@@ -147,7 +263,7 @@
         let episode = params.get('episode') || 1;
 
         function goBack() {
-            if(document.referrer.includes('movie.html')) {
+            if (document.referrer.includes('movie.html')) {
                 window.history.back();
             } else {
                 // Fallback direct build
@@ -163,16 +279,20 @@
         async function initPlayer() {
             const iframe = document.getElementById('videoIframe');
             const loader = document.getElementById('playerLoader');
-            
-            // Build Src
-            let streamUrl = "";
-            if (type === 'movie') {
-                streamUrl = `https://vidsrcme.ru/embed/movie?tmdb=${id}`;
-            } else {
-                streamUrl = `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
-            }
 
-            // Fetch Title for header (Optional but requested for polish)
+            // Initialize Stream Manager
+            window.streamManager = new StreamManager({
+                id: id,
+                type: type,
+                season: season,
+                episode: episode,
+                iframeId: 'videoIframe',
+                loaderId: 'playerLoader',
+                statusId: 'streamingStatus',
+                timeout: 10000
+            });
+
+            // Fetch Title for header
             try {
                 const details = await window.api.getMovieDetails(id, type);
                 if (details) {
@@ -180,22 +300,16 @@
                     if (type === 'tv') {
                         document.getElementById('videoMeta').innerText = `| S${season} E${episode}`;
                     } else if (details.release_date) {
-                        document.getElementById('videoMeta').innerText = `(${details.release_date.substring(0,4)})`;
+                        document.getElementById('videoMeta').innerText = `(${details.release_date.substring(0, 4)})`;
                     }
                 }
-            } catch(e) {
+            } catch (e) {
                 document.getElementById('videoTitle').innerText = "Streaming Video";
             }
-
-            // Load iframe
-            iframe.onload = () => {
-                loader.style.display = 'none'; // hide loader once loaded
-            };
-            
-            iframe.src = streamUrl;
         }
 
         initPlayer();
     </script>
 </body>
+
 </html>
