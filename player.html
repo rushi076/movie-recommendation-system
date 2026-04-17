@@ -201,6 +201,63 @@
                 opacity: 1;
             }
         }
+
+        /* Rotate & Fullscreen Button */
+        .rotate-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 4%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            font-family: inherit;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .rotate-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .rotate-btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s;
+        }
+
+        .rotate-btn:hover i {
+            transform: rotate(90deg);
+        }
+
+        .rotate-btn span {
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .rotate-btn {
+                bottom: 30px;
+                padding: 10px 20px;
+            }
+            .rotate-btn span {
+                display: none; /* Icon only on small mobile to save space */
+            }
+            .rotate-btn {
+                padding: 12px;
+                border-radius: 50%;
+            }
+        }
     </style>
 </head>
 
@@ -234,20 +291,33 @@
         <div id="backupBadge" class="backup-badge">Playing from YouTube Source</div>
 
         <iframe id="videoIframe" class="stream-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+
+        <button class="rotate-btn" id="rotateBtn" onclick="toggleRotateFullscreen()" title="Rotate & Fullscreen">
+            <i class="fas fa-redo"></i>
+            <span>Rotate & Fullscreen</span>
+        </button>
     </div>
 
     <script src="js/api.js"></script>
     <script src="js/stream-manager.js"></script>
     <script>
-        // Idle detection for header
+        // Idle detection for header and rotate button
         let idleTimer;
         const playerHeader = document.getElementById('playerHeader');
+        const rotateBtn = document.getElementById('rotateBtn');
 
         function resetIdleTimer() {
             playerHeader.style.opacity = '1';
+            rotateBtn.style.opacity = '1';
+            rotateBtn.style.pointerEvents = 'auto';
+            playerHeader.style.pointerEvents = 'auto';
+            
             clearTimeout(idleTimer);
             idleTimer = setTimeout(() => {
                 playerHeader.style.opacity = '0';
+                rotateBtn.style.opacity = '0';
+                rotateBtn.style.pointerEvents = 'none';
+                playerHeader.style.pointerEvents = 'none';
             }, 3000); // hide after 3 seconds of no mouse movement
         }
 
@@ -305,6 +375,62 @@
                 }
             } catch (e) {
                 document.getElementById('videoTitle').innerText = "Streaming Video";
+            }
+        }
+
+        async function toggleRotateFullscreen() {
+            const wrapper = document.querySelector('.player-wrapper');
+            
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    // ENTER FULLSCREEN
+                    if (wrapper.requestFullscreen) {
+                        await wrapper.requestFullscreen();
+                    } else if (wrapper.webkitRequestFullscreen) {
+                        await wrapper.webkitRequestFullscreen();
+                    } else if (wrapper.mozRequestFullScreen) {
+                        await wrapper.mozRequestFullScreen();
+                    } else if (wrapper.msRequestFullscreen) {
+                        await wrapper.msRequestFullscreen();
+                    }
+
+                    // LOCK ORIENTATION (Chrome Android / Edge Mobile)
+                    if (screen.orientation && screen.orientation.lock) {
+                        // Small delay to ensure fullscreen is active
+                        setTimeout(async () => {
+                            try {
+                                await screen.orientation.lock('landscape');
+                            } catch (e) {
+                                console.log("Orientation lock failed:", e);
+                            }
+                        }, 200);
+                    }
+                } else {
+                    // EXIT FULLSCREEN
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        await document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        await document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        await document.msExitFullscreen();
+                    }
+                }
+            } catch (err) {
+                console.error("Fullscreen error:", err);
+            }
+        }
+
+        // Handle Orientation Unlock on Exit
+        document.addEventListener('fullscreenchange', handleExit);
+        document.addEventListener('webkitfullscreenchange', handleExit);
+
+        function handleExit() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
             }
         }
 
