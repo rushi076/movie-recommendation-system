@@ -50,8 +50,6 @@ Backend / Services
 Streaming Sources
 
 * VidSrc
-* AutoEmbed
-* MultiEmbed
 * Backup Sources
 
 ---
@@ -139,11 +137,7 @@ User clicks movie to play
 
 ### 8. Streaming Sources
 
-Multiple sources available:
-
 * VidSrc
-* AutoEmbed
-* MultiEmbed
 * Backup Sources
 
 ↓
@@ -157,13 +151,6 @@ If Source 1 fails:
 * Try Backup Sources
 
 ↓
-
-### 10. Final Fallback
-
-If all sources fail:
-
-→ Redirect to Google Search
-
 ---
 
 # 🎥 Movie Player System
